@@ -205,16 +205,22 @@ Here, we also specify the localhost and master as local[ * ] which means allocat
 
 >> ./lib/python3.7/site-packages/pyspark/bin/spark-submit --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.1.2 --py-files ./modular/source/MLPipeline.zip  ./modular/source/Engine_SparkJob.py localhost 9999 --master local[*]
 
-# spark-submit --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.1.2 --py-files MLPipeline.zip  Engine_SparkJob.py localhost 9999
+>> spark-submit --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.1.2 --py-files MLPipeline.zip  Engine_SparkJob.py localhost 9999
 
-# kafka-console-consumer.sh --topic tweet-data --bootstrap-server localhost:9092
+>> kafka-console-consumer.sh --topic tweet-data --bootstrap-server localhost:9092
 
 
 
 ### Code Overview
 
-### Running and Deployment of Application
 
+
+.
+.
+.
+
+
+### Running and Deployment of Application
 
 
 In order to run and deploy the application , we will go through the following steps :- 
