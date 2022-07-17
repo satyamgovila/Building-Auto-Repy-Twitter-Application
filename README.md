@@ -180,6 +180,7 @@ producer = KafkaProducer(
 ## Spark Integration
 
 Refer to script : source/Engine_SparkJob.py
+Default Port for running Kafka - 9092
 
 **Apache Spark** is a lightning-fast cluster computing designed for fast computation. It was built on top of Hadoop MapReduce and it extends the MapReduce model to efficiently use more types of computations which includes Interactive Queries and Stream Processing.
 
@@ -193,42 +194,34 @@ In Spark Streaming divide the data stream into batches called DStreams, which in
 ![1_FLYjc6U-qAQ64yDLLrzdWw](https://user-images.githubusercontent.com/25201417/179388660-3f2c0e85-8c15-43ad-8260-1584af71fc23.jpeg)
 
 
-
 **Spark Submit Job**
 
 In order to run the python script on Spark and submit the spark job, we need to execute the following commads : 
 
+First we initialise the Kafka Consumer process on one terminal by running the following command :
+
+
+>> kafka-console-consumer --topic tweet-data --bootstrap-server localhost:9092
+
+In the other terminal, we run the command to start the Spark Streaming Job :- 
+
 >> ./lib/python3.7/site-packages/pyspark/bin/spark-submit --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.1.2  ./code/[python_file].py localhost 9999 --master local[*]
 
-On installing **pyspark** package, we need to specify the name and location of the **spark-submit** jar ,and then we need to specify the package which is in the given format : --packages [organisation name]:[spark package]:[version]
+
+On installing **pyspark** package, we need to specify the name and location of the **spark-submit** jar ,and then we need to specify the package which is in the given format : --packages [organisation which developed spark package ]:[spark package]:[version]
 Here, we also specify the localhost and master as local[ * ] which means allocating all the ports from the local.
 
->> ./lib/python3.7/site-packages/pyspark/bin/spark-submit --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.1.2 --py-files ./modular/source/MLPipeline.zip  ./modular/source/Engine_SparkJob.py localhost 9999 --master local[*]
+Now, when we post a tweet, the Kafka Consumer reads the data stream and Spark job on other terminal executes the pipeline for this latest tweet event.
 
->> spark-submit --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.1.2 --py-files MLPipeline.zip  Engine_SparkJob.py localhost 9999
-
->> kafka-console-consumer.sh --topic tweet-data --bootstrap-server localhost:9092
-
-
-
-### Code Overview
-
-
-
-.
-.
-.
-
-
-### Running and Deployment of Application
-
+## Running and Deployment of Application on AWS
 
 In order to run and deploy the application , we will go through the following steps :- 
 
+1. Setup two **AWS EC2 instances** , on first instance , we will create the Kafka instance and HOST API call script, Tweet Listener class  will be deployed on this instance. The setup will be configured on the basis of choosing Instance Type, storage , security group , and on the other instance, we will run the Spark Submit Job (just like we did in previous section by opening up 2 separate terminals and run commands)
 
-1. Setup two AWS EC2 instances, on first instance , we will create the Kafka instance and HOST API call script, Tweet Listener class  will be deployed on this instance. The setup will be configured on the basis of choosing Instance Type, storage , security group 
+Note : Expose ports on EC2 instance 2181 (zoopkeeper) , 9092 (Kafka Producer and Consumer) , 5000 (Flask API) , 9091 (Kafka UI)
 
-Execute the following steps on the first instance :- 
+2. ssh into the first EC2 instance and run the following commands to setup confluent Kafka on EC2 instance
 
 ```
 sudo apt update
@@ -245,12 +238,88 @@ confluent local start
 
 ```
 
->> kafka-console-consumer.sh --topic tweet-data --bootstrap-server localhost:9092
+Note : Run " confluent local status " to check the running status on EC2 instance.
+
+<img width="767" alt="Screenshot 2022-07-17 at 5 21 40 PM" src="https://user-images.githubusercontent.com/25201417/179396893-827a2fec-0130-43e5-b565-6cb4a151ba77.png">
 
 
-2. Spark AWS Submit
+
+
+3.  Now, from our local we can connect to this recently installed Kafka server running on EC2, by executing the following command on local
+
+>> kafka-console-consumer --topic tweet-data --bootstrap-server 34.221.72.50:9092 
+
+Note : Here we have changed from localhost to IP address to connect Kafka on EC2
+
+4.  Copy all the codes from local to the previously setup EC2 instance , pip install the requirements and finally run the **source/Engine_SparkJob.py** script to start the execution 
+
+5. Now , ssh into the other EC2 instance, and run all the previously set commands in order to setup the spark job submit 
+
+6.  Run the following command on EC2 to start the Spark Job on EC2
+
+>>  spark-submit --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.1.2 --py-files MLPipeline.zip  Engine_SparkJob.py localhost 9999
+
+Now, after both the instances have been setup and spark job is running on the second terminal, we can check the results by posting a tweet.
+
+As a last step of ML pipeline, the API automatically assigns and POST the reply with ticket ID and the final output data is **sink** to Kafka which can be further stored in s3.
+
+## Code Overview
+
+### 1. Engines
+
+This directory contains all the files required to setup the architecture and system components of the pipeline such as Kafka, binary and multi class classifier , spark job and NER .
+
+* Enginer_BinaryClassifier.py : File to train and infer sentiment analysis
+
+* Enginer_MulticlassClassifier.py : File to train and infer Complain classification
+
+* Enginer_Kafka.py : File to push tweets to kafka topic
+
+* Enginer_NER.py  : File to train and infer Name Entities
+
+* Enginer_SparkJob.py  : Main file to create Spark job and embedded using UDF
+
+    
+    
+### 2. Helpers
+
+    
+    * BinayInference.py : Helper class to infer sentiment analysis
+    
+    * Evaluate.py : Helper class to evaluate model performance
+    
+    * ModelStruct.py : Helper class to structure models and save it
+    
+    * MulticlassComplainInference.py : Helper class to infer complain classes
+    
+    * NameEntityInference.py : Helper class to infer name entities
+    
+    * Preprocess.py : Helper class to preprocess text
+    
+    * References.py : Helper class for all the constants and URL
+    
+    * ReplyTweets.py : Helper class to reply to tweets
+    
+    * RequestParams.py : Helper class to send request to API
+    
+    * TweetsListener.py : Helper class to structure twitter input
+    
+    * TwitterAuth.py : Helper class to authenticate twitter app
+    
+    * TwitterStreamer.py : Helper class to stream tweets
+    
+    * WordEmbedding.py : Helper class to convert text to sequences
+    
+ ___
+ 
+
+
+
  
 
 
 
 
+
+    
+    
