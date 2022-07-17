@@ -225,8 +225,6 @@ Here, we also specify the localhost and master as local[ * ] which means allocat
 
 In order to run and deploy the application , we will go through the following steps :- 
 
-![image](https://user-images.githubusercontent.com/25201417/179390210-ccf0d2e7-74a5-4481-a1b2-4c6283694db4.png)
-
 
 1. Setup two AWS EC2 instances, on first instance , we will create the Kafka instance and HOST API call script, Tweet Listener class  will be deployed on this instance. The setup will be configured on the basis of choosing Instance Type, storage , security group 
 
@@ -247,7 +245,7 @@ confluent local start
 
 ```
 
-# kafka-console-consumer.sh --topic tweet-data --bootstrap-server localhost:9092
+>> kafka-console-consumer.sh --topic tweet-data --bootstrap-server localhost:9092
 
 
 2. Spark AWS Submit
