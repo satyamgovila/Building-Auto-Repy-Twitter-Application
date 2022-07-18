@@ -46,7 +46,9 @@ For the training purposes in this project, we have used an “airline tweets” 
 
 ## System Architecture 
 
-[include custom diagram , explain each step] 
+<img width="1073" alt="Screenshot 2022-07-18 at 2 09 23 PM" src="https://user-images.githubusercontent.com/25201417/179474737-3d94a586-0bca-4e30-96a3-a8d1dbf404fb.png">
+
+
 
 In the system architecture , we are using Kafka Topic to ingest any new tweet using Kafka Topic with a custom class named Tweet Listener which reads data as soon as there is any new event i.e. new tweet and this Tweet Listener is stored in Kafka Topic. This Kafka Topic is further streamed using Spark Layer.
 
@@ -65,6 +67,9 @@ This notebook demonstrates data pre-processing and evaluating binary inference (
   6. Model will be saved in binaryClassificationModel.h5 file and tokenizer value in tokenizerBinaryClassification.pickle file
   Note : Here, in model.add(Dense(2,activation='softmax')) , we have used 2 because it is binary classification , if we had considered neutral also then it will be 3
   
+  
+  <img width="1032" alt="Screenshot 2022-07-18 at 2 10 33 PM" src="https://user-images.githubusercontent.com/25201417/179474987-f052c510-9fd3-46d7-ad91-0d8e23523dc0.png">
+
 
 
 * Keras Complain Classification : used to label the parsed tweet to get the category of the compain from pre defined list of categories, for example, complain can be related to refunds, airline departure, etc.
