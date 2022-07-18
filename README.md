@@ -1,4 +1,4 @@
-# Building-Auto-Reply-Twitter-Application
+# Designing and building Pipeline for Auto Repy Twitter Application using LSTM
 
 ## Buisness Use Case
 
